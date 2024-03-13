@@ -1,0 +1,68 @@
+package banque.entite;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+public class Main {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("banquePU");
+        EntityManager em = emf.createEntityManager();
+
+        // Création d'une banque
+        Banque banque = new Banque();
+        banque.setNom("Ma banque");
+
+        // Création d'un client
+        Client client = new Client();
+        client.setNom("Dupont");
+        client.setPrenom("Jean");
+        client.setDateNaissance(LocalDate.of(1980, 1, 1));
+        Adresse adresse = new Adresse();
+        adresse.setNumero(1);
+        adresse.setRue("Rue des roses");
+        adresse.setCodePostal(75000);
+        adresse.setVille("Paris");
+        client.setAdresse(adresse);
+
+        // Création d'un compte courant
+        Compte compteCourant = new Compte();
+        compteCourant.setNumero("123456789");
+        compteCourant.setSolde(1000.0);
+        compteCourant.setBanque(banque);
+        compteCourant.getClients().add(client);
+        client.getComptes().add(compteCourant);
+
+        // Création d'un livret A
+        LivretA livretA = new LivretA();
+        livretA.setNumero("987654321");
+        livretA.setSolde(500.0);
+        livretA.setTaux(0.5);
+        livretA.setBanque(banque);
+        livretA.getClients().add(client);
+        client.getComptes().add(livretA);
+
+        // Création d'une opération de virement
+        Virement virement = new Virement();
+        virement.setDate(LocalDateTime.now());
+        virement.setMontant(200.0);
+        virement.setMotif("Virement mensuel");
+        virement.setBeneficiaire("M. Durand");
+        virement.setCompte(compteCourant);
+
+        // Persistance des données
+        em.getTransaction().begin();
+        em.persist(banque);
+        em.persist(client);
+        em.persist(compteCourant);
+        em.persist(livretA);
+        em.persist(virement);
+        em.getTransaction().commit();
+
+        em.close();
+        emf.close();
+    }
+}
